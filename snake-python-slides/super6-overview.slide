@@ -1,0 +1,152 @@
+Super 6 Overview
+15 Oct 2018
+Tags: super6
+
+James Barwell
+jb@jamesbarwell.co.uk
+https://jamesbarwell.co.uk
+
+* Super 6 Overview
+
+- history
+- services
+- infrastructure
+- data feeds
+- back-end processes
+- admin
+- bits and bobs
+
+* Quick history of Super 6
+
+- the first in-house product for Sky Bet's "new" dev team, April 2010, written on Zend Framework
+- PHP site rewritten from scratch in 2013 to be mobile friendly, porting code from skybet.com Tiny framework and AMD front-end
+- IWC took over service in November 2015
+- Re-platformed to Docker / AWS in early 2016
+
+* Primary services
+
+- Site: PHP7, Tiny framework (MVC)
+- Calc: Java, Dropwizard. Three separate apps. Handles the map sort to determine user scores, flushes to the DB and provides an interface.
+- Admin: PHP5, Zend Framework and Tiny framework.
+- PA Handler: PHP5, Zend Framework. Two endpoints to receive POST requests.
+
+* Main supporting services
+
+- Event-matcher: fetch odds from Sky Bet, put in Redis
+- Stats-worker: compute previous match stats, put in Redis
+- Blue / green deployer: manages zero-outage deployment
+- Round-scaler: scales AWS infrastructure for a round
+- Checksum-poll: compute checksum of predictions when round closes and completes
+
+* External integrations
+
+- Sky Bet SSO: account functionality
+- PA Feed: XML match feed
+- SportsAPI: odds data in JSON format
+- Push websocket service: live score and odds updates on inplay page
+- Maximus: Sky Bet data warehouse, runs queries on our MySQL
+
+* APIs
+
+- Round API ("Jeff API"): Detailed JSON game state data, used by round-scaler and third-party Jeff Twitter bot.
+- Calc API: Simple JSON game state data, used by calc-engine
+- TV API: Ability to POST round data to Sky Sports via Admin
+
+* Managed Infrastructure
+
+- EC2: hosts running RancherOS
+- RDS: MySQL for all game data, Redis for sessions and content
+- S3: dynamic assets
+- CloudFront: caching, anti-DDoS, error pages
+- CloudWatch: log collation and storage
+
+* Request handling diagram
+
+.image img/s6_request.png _ _
+
+* Request handling description
+
+- Traffic goes via CloudFront to ALB, and down to target groups
+- Through to blue/green load balancer
+- In container, reverse proxied by nginx, to php-fpm, running the site code
+- Site will fetch data from MySQL, Redis and Leaderboard to fulfil request
+
+* Secrets
+
+Vault
+- backed to S3
+- manually administered via CLI inside the envrionment
+
+Auth-exchange
+- provides Vault access tokens to containers
+- only gives out tokens after checking the container is legit, using Rancher API
+
+All services need to communicate with the Vault and Exchange in order to initialise. They will sit in a while loop until they can get their secrets.
+
+* Log forwarding, metrics and alerts
+
+All services forward logs to CloudWatch using Docker log driver.
+
+Site exporter (mtail) - sits alongside each site container, mounts logs and configuration files. Runs regexes on each log line and creates a Prometheus endpoint.
+
+All node services expose a Prometheus endpoint directly.
+
+Prometheus is configured with Rancher DNS names for each service. When a service is instantiated by Rancher, the DNS is updated, and Prometheus can discover it.
+
+Prometheus is configured with alerts. It has an accompanying AlertManager service which sends notifications to Slack.
+
+* Round Scaler
+
+Uses the API to decide if this is a round day, non-round day, or day before.
+
+Scales RDS to high on round days, and low on non-round days.
+
+Web hosts are scaled up and down overnight to a baseline. On the day before they are at a higher baseline. On a round-day they scale up in increments, based on time until the round closes.
+
+* Scale
+
+- 1.2-1.3m typical entries on a weekend round
+- 1m typical entries on a midweek round
+- login spikes of over 600 logins/second
+- 48 web hosts
+- RDS m4.4xlarge
+
+Traffic very unpredictable. Jeff mentions on TV can drive significant demand.
+
+* DR
+
+- Hosted in eu-central-1 (Frankfurt).
+- Runs in a minimal state - just a DB replica
+- Would be built on demand if required
+- Estimated build time - 4-6 hours
+
+* PA Feed failure modes
+
+- No messages coming through
+- Old messages coming through
+- Incorrect messages coming through
+
+* Calc failure modes
+
+- Not put into inplay polling state
+- Early flush
+
+* Monitoring failure modes
+
+- Lost DNS pointers to targets
+
+* Site failure modes
+
+- Containers cannot start
+- No containers in service
+- MySQL maxed out
+- Redis maxed out
+
+* Misc
+
+- Feature switches
+- Checksums
+- Round scheduling
+- Native apps
+
+* The end

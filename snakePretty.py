@@ -1,6 +1,6 @@
-from turtle import * # Import entire turtle module responsible for drawing graphics 
-from random import randint # Import randint function which generates random numbers 
+from random import randint # Import randint function which generates random numbers
 from time import sleep # Import sleep function which makes the program wait for a given ammount of seconds
+from turtle import * # Import entire turtle module responsible for drawing graphics
 
 #Game engine setup
 delay(0)
@@ -35,9 +35,9 @@ y = 0
 xChange = 1
 yChange = 0
 
-tailLength = 10
-previousY = [0,0,0,0,0,0,0,0,0,0]
-previousX = [0,0,0,0,0,0,0,0,0,0]
+tailLength = 3
+previousY = [0,0,0]
+previousX = [-1,-2,-3]
 
 #Head pen setup 
 head = Turtle()
@@ -48,14 +48,11 @@ head.speed(0)
 #Tail pen setup
 tail = Turtle()
 tail.penup()
-tail.color('blue')
-tail.shape('square')
 tail.speed(0)
 
 #rocks pen setup
 rocks = Turtle()
 rocks.penup()
-rocks.color('brown')
 rocks.shape('rock.gif')
 rocks.speed(0)
 rocks.hideturtle()
@@ -66,7 +63,6 @@ rocksYList = []
 apple = Turtle()
 apple.penup()
 apple.shape('apple.gif')
-apple.color('red')
 apple.hideturtle()
 
 #Apple Variables
@@ -79,6 +75,10 @@ hideturtle()
 penup()
 color("red")
 
+# Bring window to front
+rootwindow = getcanvas().winfo_toplevel()
+rootwindow.call('wm', 'attributes', '.', '-topmost', '1')
+rootwindow.call('wm', 'attributes', '.', '-topmost', '0')
 
 # Move apple function
 def moveApple():
@@ -185,10 +185,10 @@ onkey(moveRight,'Right')
 listen()
 
 #Setup our rocks
-setupHorizontalWall(-21,21,18)
-setupHorizontalWall(-21,21,-18)
-setupVerticalWall(-18,18,21)
-setupVerticalWall(-18,18,-21)
+#setupHorizontalWall(-21,21,18)
+#setupHorizontalWall(-21,21,-18)
+#setupVerticalWall(-18,18,21)
+#setupVerticalWall(-18,18,-21)
 
 #Draw rocks
 for i in range(len(rocksXList)):
@@ -196,7 +196,6 @@ for i in range(len(rocksXList)):
     rocks.stamp()
 
 
-sleep(5)
 while(gameIsRunning):
     #Clear previous frame
     head.clearstamps()
@@ -209,7 +208,7 @@ while(gameIsRunning):
     #Cut list to size of tail
     previousX[:tailLength]
 
-    #Repeat for current y 
+    #Repeat for current y
     previousY.insert(0,y)
     previousY[:tailLength]
 
@@ -230,7 +229,7 @@ while(gameIsRunning):
         if (x == previousX[i] and y == previousY[i]):
             displayLoseMessage()
 
-    #Draw head 
+    #Draw head
     head.stamp()
 
     #Draw tail
@@ -311,14 +310,17 @@ while(gameIsRunning):
         tailLength = tailLength + 1
         moveApple()
         printScore()
-        
+
     #Draw apple code
     apple.setposition(appleX * step, appleY * step)
     apple.stamp()
-        
+
 
     update()
     sleep(0.05)
+
+
+
 
 # Once you lose, close the game after 5 seconds. 
 sleep(2)

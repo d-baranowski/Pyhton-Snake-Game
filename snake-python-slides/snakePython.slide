@@ -1,0 +1,228 @@
+How to make snake
+in Python
+
+
+Daniel Baranowski
+Infinity Works
+
+* Aim and Objective
+- Practice your Python
+- Show you an interesting project you can build using your programming skills
+- Spark your imagination
+.image img/imadethis.jpg
+
+* Python modules
+.play exampleRand.py
+
+* Python modules
+.play exampleSleep.py
+
+* Group Bets
+
+.image img/gb-app.png _ 1000
+
+* What is Group Bets?
+
+Group Bets is *NOT* syndicated betting... yet.
+
+Group Bets introduces strong social dynamics into betting.
+
+- Create or join a group of friends
+- Create a bet (multiple markets are supported)
+- Add your own selection to the bet along with your friends
+- Build an acca together and place a real bet on it if you wish
+- Chat away while the results come through
+
+Get rich with your friends or be forever shunned by them.
+
+: Supported markets: Full Time Result, BTTS and Under/Over 2.5 Goals
+
+* Timeline
+
+# Add image
+# Draw an actual timeline
+
+.image img/project-timeline.png _ 1000
+
+- Project inception end 2017: standalone app? Website? Who manages the service: Sky Bet or IW?
+- Final approach agreed: IW to develop as website, Sky Bet to provide an app wrapper for it within Sky Bet app
+- Development starts Jan 29th 2018
+- Closed Beta - April 2018
+- Public beta - August 2018
+
+: Public beta starts 23 Jul
+: SSO integration delayed until April
+: Group Bets is embedded into the Sky Bet native app, which simply provides a wrapper for it
+
+* The Architecture of Group Bets
+
+* Tech Stack
+
+Usual Suspects
+
+- AWS: EC2, RDS (MySQL), CloudFront, CloudWatch, S3, SNS, no Lambda :-(
+- RancherOS
+- Redis
+- Node
+- WebSockets
+- node-app-*
+
+New Tech
+
+- React
+- Redux + Sagas
+
+* Components Overview
+
+.image img/gb-architecture.png _ 900
+
+: Only 3rd pary integrations are Sky Bet SSO and Sports API
+
+* Layer 1: Frontends
+
+.image img/gb-arch-l1.png
+
+* Client
+
+- Single page React app, hosted in S3
+- Thin client
+- Redux as data store, sagas to move data back and forth
+- Tests: Enzyme, Jest
+
+.image img/gb-client.png _ 300
+
+* Sockets Service
+
+- Provides real-time chat updates by popping messages from Redis pubsub queue and emitting them as WebSocket events
+- User automatically joins a room for every group they're a member of on login
+- Part reg users can't chat though...
+
+.image img/gb-partregchat.png _ 300
+
+* Admin
+
+- Soccer match corrections
+- Group administration
+- Granular *REAL*TIME* feature switch control
+- Chat Moderation (Compliance)
+
+.image img/gb-admin.png _ 550
+
+* Feature Switches
+
+.image img/gb-switches.png _ 400
+
+* Layer 2: Orchestration and Data Collation
+
+.image img/gb-arch-l2.png
+
+* Group Bet Service
+
+Neural center of the app
+
+- Authentication
+- Bet and leg management
+- Provides historical timeline feeds for groups (to backfill timeline on page load)
+- User and bet stats (form)
+- Feature switches
+- Device registration for push notifications
+- User feedback
+
+* Sports Service
+
+- Provides data used to populate coupons
+- Reads fixtures and scores inserted by Sports API into DB
+- Fetches markets and odds updated by the Odds Handler in Redis
+
+.image img/gb-coupon.png _ 400
+
+* Layer 3: Data Providers
+
+.image img/gb-arch-l3.png
+
+* Sports API Handler
+
+- Scrapes Sky Bet Sports API every 10-30s to retrieve all match updates
+- Caches last known state of the Sports API in-memory
+- Diffs cache contents with live API every cycle to determine updates
+- Divided into 3 _subprocesses_: prelive, live and complete
+
+* Sports API Handler
+
+.image img/gb-sportsapi.png _ 425
+
+: Think of the P7 calc-engine
+
+* Odds Handler
+
+- Fetches soccer match entries from SQL
+- Parses Sky Bet Sports API every 30-120s to retrieve event odds for supported markets
+- Matches up fixtures with their odds and stores a Redis document
+
+: Similar to Sports API handler
+
+* Bets and Legs Handler
+
+- Leg updater: update the outcome of all inplay legs as matches progress and settle them on match complete
+- Bet settler: settle bets to "won", "lost" or "void" according to the outcome of all the legs in the bet, once they're all settled
+
+.image img/gb-settle.png _ 350
+
+* Timeline Service
+
+- Stores messages received via Redis queue onto database to be shown on timeline feed
+- Forwards messages to Redis pubsub queue for (Web)Sockets service to consume
+- Keyword-based chat message analysis. Messages containing keywords in a blacklist are flagged up and SBG are notified via email to follow up
+
+: Two priorities: standard and immediate
+
+.image img/gb-timeline.png
+
+* Layer 4
+
+- Push Notifications (Android & iOS): fetches timeline messages from database, works out the recipients and sends mobile push notifications via SNS
+
+.image img/gb-arch-l4.png _ 400
+
+* Ancillary Services
+
+- Metrics: business metric exports for Prometheus
+- Verifier: checks state of all matches in DB to find inconsistencies, such as wrong match statuses and alerts Slack events channel
+
+* Supporting Group Bets
+
+* AWS Infrastructure
+
+.image img/gb-aws.png _ 950
+
+* Support
+
+Copper-level service support: most non-critical issues handled in the next working day
+
+Service alerts on *#gb-events-prod*
+
+Capacity Provisioning
+
+- Webs and apps auto-scale based on CPU usage (switching to memory usage soon)
+- Database scales on weekends via `rds-scaler`
+
+Key Checks
+
+- Site is up
+- Login works
+- Coupons are shown
+- Can create groups, bets and selections
+- Game events and chat work in a timely fashion
+
+* Watch These Guys
+
+.image img/gb-point.png
+
+- Sports API Handler: can break after DB scale-up/downs. Turn it off and on again.
+- Timeline Service: watch queue length and message lag.
+- Socket Service: watch number of connected clients and memory usage. Increase number of socket containers on Rancher if they start crashing and bouncing.
+
+* Common Issues
+
+- Coupons not populated, new prelive matches don't appear, live match scores don't update => Sports API Handler may be malfunctioning (dupes, wrong state). Turn it off and on again
+- Verifier reports matches not kicking off in alerts channel: could be a Sports API Handler issue or a genuine problem with Sports API. Update manually in admin.
