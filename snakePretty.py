@@ -69,7 +69,6 @@ apple.hideturtle()
 appleX = 10
 appleY = 10
 
-
 #Lose message pen setup
 hideturtle()
 penup()
@@ -119,9 +118,7 @@ def setupVerticalWall(startY, endY, x):
     global rocks
     global rocksXList
     global rocksYList
-    for i in range(startY, endY + 1):
-        rocksYList.append(i)
-        rocksXList.append(x)
+    # ADD CODE HERE 
 
 def printScore():
     global score
@@ -170,10 +167,7 @@ def moveRight():
     global yChange
     global head
 
-    if not (xChange == -1 and yChange == 0):
-        head.shape('head_right.gif')
-        xChange = 1
-        yChange = 0
+    # ADD CODE HERE 
 
 def getTailStamp(i, currentSegmentX, currentSegmentY, previousSegmentX, previousSegmentY):
     if (i == tailLength -1):
@@ -234,10 +228,10 @@ onkey(moveRight,'Right')
 listen()
 
 #Setup our rocks
-#setupHorizontalWall(-21,21,18)
-#setupHorizontalWall(-21,21,-18)
-#setupVerticalWall(-18,18,21)
-#setupVerticalWall(-18,18,-21)
+setupHorizontalWall(-21,21,18)
+setupHorizontalWall(-21,21,-18)
+setupVerticalWall(-18,18,21)
+setupVerticalWall(-18,18,-21)
 
 #Draw rocks
 for i in range(len(rocksXList)):
@@ -268,9 +262,7 @@ while(gameIsRunning):
     head.setposition(x * step,y * step)
 
     #Hit wall to lose
-    for i in range(len(rocksXList)):
-        if (x == rocksXList[i] and y == rocksYList[i]):
-            displayLoseMessage()
+    # ADD CODE HERE 
 
     #Bite tail to lose
     for i in range(tailLength):
@@ -308,8 +300,6 @@ while(gameIsRunning):
 
     update()
     sleep(0.05)
-
-
 
 
 # Once you lose, close the game after 5 seconds. 
