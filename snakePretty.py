@@ -32,7 +32,7 @@ gameIsRunning = True
 score = 0
 x = 0
 y = 0
-xChange = 1
+xChange = 0
 yChange = 0
 
 tailLength = 3
@@ -175,6 +175,55 @@ def moveRight():
         xChange = 1
         yChange = 0
 
+def getTailStamp(i, currentSegmentX, currentSegmentY, previousSegmentX, previousSegmentY):
+    if (i == tailLength -1):
+        if (previousSegmentX < currentSegmentX):
+            return "tail_end_left.gif"
+        elif (previousSegmentX > currentSegmentX):
+            return "tail_end_right.gif"
+        elif (previousSegmentY > currentSegmentY):
+            return "tail_end_up.gif"
+        elif (previousSegmentY < currentSegmentY):
+            return "tail_end_down.gif"
+    # Draw middle sections of the tail
+    else:
+        if (i == 0):
+            previousSegmentX = x
+            previousSegmentY = y
+        else:
+            previousSegmentX = previousX[i - 1]
+            previousSegmentY = previousY[i - 1]
+
+        nextSegmentX = previousX[i + 1]
+        nextSegmentY = previousY[i + 1]
+
+        if (previousSegmentY == nextSegmentY):
+            return "tail_straight_horizontal.gif"
+        elif (previousSegmentX == nextSegmentX):
+            return "tail_straight_vertical.gif"
+        elif(nextSegmentX > currentSegmentX):
+            if (previousSegmentY < nextSegmentY):
+                return "tail_turn_4.gif"
+            else:
+                return "tail_turn_1.gif"
+        elif(nextSegmentX < currentSegmentX):
+            if (previousSegmentY < nextSegmentY):
+                return "tail_turn_3.gif"
+            else:
+                return "tail_turn_2.gif"
+        elif(nextSegmentY > currentSegmentY):
+            if (previousSegmentX < nextSegmentX):
+                return "tail_turn_2.gif"
+            else:
+                return "tail_turn_1.gif"
+        elif(nextSegmentY < currentSegmentY):
+            if (previousSegmentX < nextSegmentX):
+                return "tail_turn_3.gif"
+            else:
+                return "tail_turn_4.gif"
+        else:
+            return "square"
+
 
 #Bind movement functions to keyboard keys    
 onkey(moveUp,'Up')
@@ -202,19 +251,18 @@ while(gameIsRunning):
     tail.clearstamps()
     apple.clearstamps()
 
-    #Insert current x at the start of previousX list
-    previousX.insert(0,x)
+    if not (xChange == 0 and yChange == 0):
+        #Insert current x and y at the start of previousX and previousY lists
+        previousX.insert(0,x)
+        previousY.insert(0,y)
 
-    #Cut list to size of tail
-    previousX[:tailLength]
+        #Calculate new x and y positions
+        x = x + xChange
+        y = y + yChange
 
-    #Repeat for current y
-    previousY.insert(0,y)
-    previousY[:tailLength]
-
-    #Calculate new x and y positions
-    x = x + xChange
-    y = y + yChange
+        #Cut lists to size of tail
+        previousX = previousX[:tailLength]
+        previousY = previousY[:tailLength]
 
     #Move head pen to new x and y position
     head.setposition(x * step,y * step)
@@ -229,9 +277,6 @@ while(gameIsRunning):
         if (x == previousX[i] and y == previousY[i]):
             displayLoseMessage()
 
-    #Draw head
-    head.stamp()
-
     #Draw tail
     for i in range(tailLength):
         tail.setposition(previousX[i] * step, previousY[i] * step)
@@ -241,74 +286,19 @@ while(gameIsRunning):
         previousSegmentX = previousX[i - 1]
         previousSegmentY = previousY[i - 1]
 
-        if (i == tailLength -1):
-            if (previousSegmentX < currentSegmentX):
-                tail.shape("tail_end_left.gif")
-                tail.stamp()
-            elif (previousSegmentX > currentSegmentX):
-                tail.shape("tail_end_right.gif")
-                tail.stamp()
-            elif (previousSegmentY > currentSegmentY):
-                tail.shape("tail_end_up.gif")
-                tail.stamp()
-            elif (previousSegmentY < currentSegmentY):
-                tail.shape("tail_end_down.gif")
-                tail.stamp()
-        else:
-            if (i == 0):
-                previousSegmentX = x
-                previousSegmentY = y
-            else:
-                previousSegmentX = previousX[i - 1]
-                previousSegmentY = previousY[i - 1]
+        tailStamp = getTailStamp(i, currentSegmentX, currentSegmentY, previousSegmentX, previousSegmentY);
+        tail.shape(tailStamp)
+        tail.stamp()
 
-            nextSegmentX = previousX[i + 1]
-            nextSegmentY = previousY[i + 1]
 
-            if (previousSegmentY == nextSegmentY):
-                tail.shape("tail_straight_horizontal.gif")
-                tail.stamp()
-            elif (previousSegmentX == nextSegmentX):
-                tail.shape("tail_straight_vertical.gif")
-                tail.stamp()
-            elif(nextSegmentX > currentSegmentX):
-                if (previousSegmentY < nextSegmentY):
-                    tail.shape("tail_turn_4.gif")
-                    tail.stamp()
-                else:
-                    tail.shape("tail_turn_1.gif")
-                    tail.stamp()
-            elif(nextSegmentX < currentSegmentX):
-                if (previousSegmentY < nextSegmentY):
-                    tail.shape("tail_turn_3.gif")
-                    tail.stamp()
-                else:
-                    tail.shape("tail_turn_2.gif")
-                    tail.stamp()
-            elif(nextSegmentY > currentSegmentY):
-                if (previousSegmentX < nextSegmentX):
-                    tail.shape("tail_turn_2.gif")
-                    tail.stamp()
-                else:
-                    tail.shape("tail_turn_1.gif")
-                    tail.stamp()
-            elif(nextSegmentY < currentSegmentY):
-                if (previousSegmentX < nextSegmentX):
-                    tail.shape("tail_turn_3.gif")
-                    tail.stamp()
-                else:
-                    tail.shape("tail_turn_4.gif")
-                    tail.stamp()
-            else:
-                tail.shape("square")
-                tail.stamp()
-
+    #Draw head
+    head.stamp()
 
     #Eat apple code
     if (x == appleX and y == appleY):
         score = score + 1
-        tailLength = tailLength + 1
         moveApple()
+        tailLength = tailLength + 1
         printScore()
 
     #Draw apple code
