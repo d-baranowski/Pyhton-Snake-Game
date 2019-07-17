@@ -11,6 +11,31 @@ Infinity Works
 - Spark your imagination
 .image img/imadethis.jpg
 
+* Install Ubuntu
+    $ pip --version
+    pip 9.0.1 from /usr/lib/python2.7/dist-packages (python 2.7)
+    $ python --version
+    Python 2.7.15+
+    $ sudo apt install git
+    $ git clone https://github.com/d-baranowski/Pyhton-Snake-Game.git
+    $ cd Pyhton-Snake-Game/
+    $ sudo apt-add-repository universe
+    $ sudo apt install python-pip
+    $ pip install turtle
+    $ sudo apt install python-tk 
+    $ python ./snakePretty.py 
+
+* Install Windows
+https://github.com/d-baranowski/Pyhton-Snake-Game
+.image img/install1.png _ 1000
+
+* Install Windows
+.image img/install2.png _ 1000
+
+* Install Windows
+https://www.python.org/downloads/windows/
+.image img/install3.png _ 1000
+
 * Python modules
 .play exampleRand.py
 
@@ -20,7 +45,10 @@ Infinity Works
 * Turtle module
 - We use the python graphics libary called Turtle
 - RTFM
-https://docs.python.org/3.3/library/turtle.html?highlight=turtle
+https://docs.python.org/2.7/library/turtle.html
+
+* Coordinate System
+.image img/coordinate.gif _ 500
 
 * Simple Rock Drawing Game
 .play drawRocks.py /START OMIT/,/END OMIT/
@@ -62,6 +90,9 @@ https://docs.python.org/3.3/library/turtle.html?highlight=turtle
 .play movementCode.py
 
 * Snake controls
+.play bind.py
+
+* Snake controls
 .play moveUp.py
 
 * Snake controls
@@ -71,6 +102,37 @@ https://docs.python.org/3.3/library/turtle.html?highlight=turtle
 .play moveLeft.py
 
 * Snake controls
-!!±! !! Implement move right!@!!!!
+- Have look at snakePretty.py and fix the missing implementation of moveRight function
+
+* Snake controls
 .play moveRight.py
 
+* Setup walls
+.play setupHorizontalWall.py
+
+* Setup walls
+- Have look at snakePretty.py and fix the missing implementation of setupVerticalWall function
+
+* Setup walls
+.play setupVerticalWall.py
+
+* Don't eat rocks 
+- Find the comment #Hit wall to lose and modify the code
+- Use function displayLoseMessage when snake collides with any of the rocks 
+
+* Don't eat rocks 
+.play rocks.py
+
+* Challanges 
+- More challanging map
+- More obstacles
+- Immortality Start Bonus
+- Multi Player
+- What ever you can think of 
+
+* Contact
+- Daniel-Baranowski on Slack
+- Email: dan@devtales.net
+
+* Feedback
+- Please give us feedback 🙇

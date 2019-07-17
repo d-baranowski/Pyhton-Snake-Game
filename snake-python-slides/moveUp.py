@@ -11,7 +11,7 @@ def moveUp():
         xChange = 0
         yChange = 1
 
-print "X: {0} Y: {1}".format(x, y)
+print "xChange: {0} yChange: {1}".format(xChange, yChange)
 print "Moving up now."
 moveUp()
-print "X: {0} Y: {1}".format(x, y)
+print "xChange: {0} yChange: {1}".format(xChange, yChange)
