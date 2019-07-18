@@ -64,7 +64,7 @@ https://docs.python.org/2.7/library/turtle.html
 * Snake Movement
 - Variables xChange and yChange indicate the direction of movement
 1. Add current head position to the start of previous positions list
-2. Set current position to the current position plus change
+2. Add the xChange to x and and the yChange to y
 3. Trim the length of previous positions list to tailLength
 
 * Snake Movement

@@ -1,10 +1,10 @@
 #!/usr/bin/env python -u
 from time import sleep # Import sleep function which makes the program wait for a given ammount of seconds
-x = 0; y = 0
+x = 4; y = 0
 xChange = 1; yChange = 0
 
 tailLength = 3
-previousY = [0,0,0]; previousX = [-1,-2,-3]
+previousY = [0,0,0]; previousX = [3,2,1]
 
 while(True):
     #Insert current x at the start of previousX list
